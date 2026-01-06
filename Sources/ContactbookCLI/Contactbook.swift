@@ -11,6 +11,7 @@ public struct Contactbook: AsyncParsableCommand {
             ContactsCommand.self,
             GroupsCommand.self,
             MCPCommand.self,
+            LookupCommand.self,
         ],
         defaultSubcommand: ContactsCommand.self
     )

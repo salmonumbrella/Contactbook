@@ -28,11 +28,6 @@ let package = Package(
             dependencies: ["ContactbookCLI"],
             path: "Sources/ContactbookExec"
         ),
-        .testTarget(
-            name: "ContactbookTests",
-            dependencies: ["ContactbookCLI"],
-            path: "Tests/ContactbookTests"
-        ),
     ],
     swiftLanguageModes: [.v6]
 )

@@ -20,14 +20,31 @@ Clone the repository and build using Swift Package Manager:
 ```bash
 git clone https://github.com/RyanLisse/Contactbook.git
 cd Contactbook
-swift build -c release
+./build.sh
 ```
 
-The binary will be available at `.build/release/contactbook`. You can move it to your PATH:
+The binary will be available at `.build/arm64-apple-macosx/release/contactbook`. You can move it to your PATH:
 
 ```bash
-cp .build/release/contactbook /usr/local/bin/
+cp .build/arm64-apple-macosx/release/contactbook /usr/local/bin/
 ```
+
+### Permissions Setup
+
+**Important:** macOS requires Contacts permission for this tool to work. After building:
+
+1. **For properly signed binaries:** Run the tool once - macOS will show a permission prompt automatically.
+
+2. **For adhoc-signed binaries (development):** 
+   - The permission prompt may not appear automatically
+   - Go to **System Settings > Privacy & Security > Contacts**
+   - Look for "contactbook" in the list and enable it
+   - If it doesn't appear, you may need to use a valid Apple Developer certificate
+
+3. **Troubleshooting:**
+   - If you see "Access Denied" errors, check System Settings > Privacy & Security > Contacts
+   - Ensure the binary is properly signed with entitlements (the `build.sh` script handles this)
+   - For development, consider using an Apple Development certificate instead of adhoc signing
 
 ## CLI Usage
 
