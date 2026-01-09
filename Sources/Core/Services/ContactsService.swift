@@ -405,13 +405,17 @@ public actor ContactsService {
     // MARK: - Phone Lookup
 
     public func lookupByPhone(phoneNumber: String) async throws -> Contact? {
+        // Normalize input: remove all non-digits
         let normalizedInput = phoneNumber.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)
         guard !normalizedInput.isEmpty else { return nil }
 
+        // Use last 7 digits for matching (handles international formats)
         let searchSuffix = normalizedInput.count >= 7 ? String(normalizedInput.suffix(7)) : normalizedInput
 
+        // Optimized AppleScript: returns immediately on first match
+        // Uses longer timeout for large contact databases
         let script = """
-        with timeout of 30 seconds
+        with timeout of 300 seconds
             tell application "Contacts"
                 repeat with p in people
                     repeat with ph in phones of p
@@ -458,7 +462,8 @@ public actor ContactsService {
         end timeout
         """
 
-        let result = try runAppleScript(script, timeout: 15)
+        // Use 180 second timeout for Process execution (matches AppleScript timeout)
+        let result = try runAppleScript(script, timeout: 180)
         if result.isEmpty {
             return nil
         }
