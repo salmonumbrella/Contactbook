@@ -465,6 +465,8 @@ public actor ContactsService {
         guard !normalizedInput.isEmpty else { return nil }
 
         // Use last 7 digits for matching (handles international formats)
+        // Note: searchSuffix is guaranteed to contain only digits (0-9) after normalization,
+        // so it's safe to interpolate directly into AppleScript without escaping
         let searchSuffix = normalizedInput.count >= 7 ? String(normalizedInput.suffix(7)) : normalizedInput
 
         let script = """

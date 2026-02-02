@@ -16,6 +16,9 @@ public struct AuthorizeCommand: AsyncParsableCommand {
     @Flag(name: .long, help: "Output as plain text")
     var plain: Bool = false
 
+    @Flag(name: .long, help: "Output status only, no guidance")
+    var quiet: Bool = false
+
     public func run() async throws {
         let service = ContactsService.shared
         let current = await service.authorizationStatus()
@@ -33,7 +36,7 @@ public struct AuthorizeCommand: AsyncParsableCommand {
             print(status.rawValue)
         } else {
             print("Contacts access: \(status.displayName)")
-            if !status.isAuthorized {
+            if !quiet && !status.isAuthorized {
                 print(status.guidance)
             }
         }

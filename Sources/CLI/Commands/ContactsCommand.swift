@@ -130,6 +130,12 @@ public struct GetContact: AsyncParsableCommand {
     @Flag(name: .long, help: "Output as JSON")
     var json: Bool = false
 
+    @Flag(name: .long, help: "Output as plain text (tab-separated)")
+    var plain: Bool = false
+
+    @Flag(name: .long, help: "Output ID only")
+    var quiet: Bool = false
+
     public func run() async throws {
         let service = ContactsService.shared
         guard let contact = try await service.getContact(id: id) else {
@@ -141,6 +147,12 @@ public struct GetContact: AsyncParsableCommand {
             encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
             let data = try encoder.encode(contact)
             print(String(data: data, encoding: .utf8)!)
+        } else if quiet {
+            print(contact.id)
+        } else if plain {
+            let phones = contact.phones.joined(separator: ";")
+            let emails = contact.emails.joined(separator: ";")
+            print("\(contact.id)\t\(contact.fullName)\t\(phones)\t\(emails)")
         } else {
             printContact(contact, verbose: true)
         }
