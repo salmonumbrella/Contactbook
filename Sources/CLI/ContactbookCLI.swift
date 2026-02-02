@@ -10,6 +10,7 @@ public struct contactbook: AsyncParsableCommand {
         version: "1.0.0",
         subcommands: [
             StatusCommand.self,
+            AuthorizeCommand.self,
             ContactsCommand.self,
             GroupsCommand.self,
             MCPCommand.self,
