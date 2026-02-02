@@ -27,15 +27,13 @@ public actor ContactsService {
 
         try process.run()
 
-        let deadline = Date().addingTimeInterval(timeout)
-        while process.isRunning && Date() < deadline {
-            Thread.sleep(forTimeInterval: 0.1)
-        }
-
-        if process.isRunning {
+        let workItem = DispatchWorkItem {
             process.terminate()
-            return ""
         }
+        DispatchQueue.global().asyncAfter(deadline: .now() + timeout, execute: workItem)
+
+        process.waitUntilExit()
+        workItem.cancel()
 
         let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
         let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
