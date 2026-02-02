@@ -32,6 +32,12 @@ public struct ListContacts: AsyncParsableCommand {
     @Flag(name: .long, help: "Output as JSON")
     var json: Bool = false
 
+    @Flag(name: .long, help: "Output as plain text (tab-separated)")
+    var plain: Bool = false
+
+    @Flag(name: .long, help: "Output count only")
+    var quiet: Bool = false
+
     public func run() async throws {
         let service = ContactsService.shared
         let contacts = try await service.listContacts(limit: limit)
@@ -41,6 +47,14 @@ public struct ListContacts: AsyncParsableCommand {
             encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
             let data = try encoder.encode(contacts)
             print(String(data: data, encoding: .utf8)!)
+        } else if quiet {
+            print(contacts.count)
+        } else if plain {
+            for contact in contacts {
+                let phones = contact.phones.joined(separator: ";")
+                let emails = contact.emails.joined(separator: ";")
+                print("\(contact.id)\t\(contact.fullName)\t\(phones)\t\(emails)")
+            }
         } else {
             if contacts.isEmpty {
                 print("No contacts found")
@@ -67,6 +81,12 @@ public struct SearchContacts: AsyncParsableCommand {
     @Flag(name: .long, help: "Output as JSON")
     var json: Bool = false
 
+    @Flag(name: .long, help: "Output as plain text (tab-separated)")
+    var plain: Bool = false
+
+    @Flag(name: .long, help: "Output count only")
+    var quiet: Bool = false
+
     public func run() async throws {
         let service = ContactsService.shared
         let contacts = try await service.searchContacts(query: query)
@@ -76,6 +96,14 @@ public struct SearchContacts: AsyncParsableCommand {
             encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
             let data = try encoder.encode(contacts)
             print(String(data: data, encoding: .utf8)!)
+        } else if quiet {
+            print(contacts.count)
+        } else if plain {
+            for contact in contacts {
+                let phones = contact.phones.joined(separator: ";")
+                let emails = contact.emails.joined(separator: ";")
+                print("\(contact.id)\t\(contact.fullName)\t\(phones)\t\(emails)")
+            }
         } else {
             if contacts.isEmpty {
                 print("No contacts matching '\(query)'")
