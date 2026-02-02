@@ -13,6 +13,55 @@ public actor ContactsService {
             .replacingOccurrences(of: "\"", with: "\\\"")
     }
 
+    // MARK: - Authorization
+
+    public func authorizationStatus() -> ContactsAuthorizationStatus {
+        let script = """
+        tell application "Contacts"
+            try
+                count of people
+                return "authorized"
+            on error errMsg
+                if errMsg contains "not allowed" or errMsg contains "denied" then
+                    return "denied"
+                else
+                    return "error"
+                end if
+            end try
+        end tell
+        """
+
+        do {
+            let result = try runAppleScript(script, timeout: 10)
+            if result == "authorized" || Int(result) != nil {
+                return .authorized
+            } else if result == "denied" {
+                return .denied
+            }
+            return .notDetermined
+        } catch {
+            return .notDetermined
+        }
+    }
+
+    public func requestAuthorization() async throws -> ContactsAuthorizationStatus {
+        let script = """
+        tell application "Contacts"
+            count of people
+        end tell
+        """
+
+        do {
+            _ = try runAppleScript(script, timeout: 30)
+            return .authorized
+        } catch let error as ContactsError {
+            if case .scriptError(let msg) = error, msg.contains("not allowed") || msg.contains("denied") {
+                return .denied
+            }
+            throw error
+        }
+    }
+
     // MARK: - AppleScript Execution
 
     private func runAppleScript(_ script: String, timeout: TimeInterval = 120) throws -> String {
