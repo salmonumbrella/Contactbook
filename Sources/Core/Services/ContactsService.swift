@@ -418,14 +418,14 @@ public actor ContactsService {
         // Use last 7 digits for matching (handles international formats)
         let searchSuffix = normalizedInput.count >= 7 ? String(normalizedInput.suffix(7)) : normalizedInput
 
-        // Optimized AppleScript: returns immediately on first match
-        // Uses longer timeout for large contact databases
         let script = """
         with timeout of 300 seconds
             tell application "Contacts"
                 repeat with p in people
                     repeat with ph in phones of p
-                        if value of ph contains "\(searchSuffix)" then
+                        set phoneVal to value of ph
+                        set cleanPhone to do shell script "echo " & quoted form of phoneVal & " | tr -cd '0-9'"
+                        if cleanPhone ends with "\(searchSuffix)" then
                             set contactId to id of p
                             set firstName to first name of p
                             set lastName to last name of p
@@ -468,7 +468,6 @@ public actor ContactsService {
         end timeout
         """
 
-        // Use 180 second timeout for Process execution (matches AppleScript timeout)
         let result = try runAppleScript(script, timeout: 180)
         if result.isEmpty {
             return nil
