@@ -5,6 +5,14 @@ public actor ContactsService {
 
     private init() {}
 
+    /// Escapes a string for safe use in AppleScript double-quoted strings.
+    /// Must escape backslashes first, then double quotes.
+    private func escapeForAppleScript(_ input: String) -> String {
+        input
+            .replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "\"", with: "\\\"")
+    }
+
     // MARK: - AppleScript Execution
 
     private func runAppleScript(_ script: String, timeout: TimeInterval = 120) throws -> String {
@@ -100,7 +108,7 @@ public actor ContactsService {
     // MARK: - Search Contacts
 
     public func searchContacts(query: String) async throws -> [Contact] {
-        let escapedQuery = query.replacingOccurrences(of: "\"", with: "\\\"")
+        let escapedQuery = escapeForAppleScript(query)
 
         let script = """
         tell application "Contacts"
@@ -155,7 +163,7 @@ public actor ContactsService {
     // MARK: - Get Contact
 
     public func getContact(id: String) async throws -> Contact? {
-        let escapedId = id.replacingOccurrences(of: "\"", with: "\\\"")
+        let escapedId = escapeForAppleScript(id)
 
         let script = """
         tell application "Contacts"
@@ -220,12 +228,12 @@ public actor ContactsService {
         jobTitle: String?,
         note: String?
     ) async throws -> String {
-        let fn = (firstName ?? "").replacingOccurrences(of: "\"", with: "\\\"")
-        let ln = (lastName ?? "").replacingOccurrences(of: "\"", with: "\\\"")
-        let org = (organization ?? "").replacingOccurrences(of: "\"", with: "\\\"")
-        let jt = (jobTitle ?? "").replacingOccurrences(of: "\"", with: "\\\"")
-        let em = (email ?? "").replacingOccurrences(of: "\"", with: "\\\"")
-        let ph = (phone ?? "").replacingOccurrences(of: "\"", with: "\\\"")
+        let fn = escapeForAppleScript(firstName ?? "")
+        let ln = escapeForAppleScript(lastName ?? "")
+        let org = escapeForAppleScript(organization ?? "")
+        let jt = escapeForAppleScript(jobTitle ?? "")
+        let em = escapeForAppleScript(email ?? "")
+        let ph = escapeForAppleScript(phone ?? "")
 
         var setProps = "set newPerson to make new person with properties {"
         var props: [String] = []
@@ -268,20 +276,20 @@ public actor ContactsService {
         jobTitle: String?,
         note: String?
     ) async throws -> Bool {
-        let escapedId = id.replacingOccurrences(of: "\"", with: "\\\"")
+        let escapedId = escapeForAppleScript(id)
 
         var updates: [String] = []
         if let fn = firstName {
-            updates.append("set first name of p to \"\(fn.replacingOccurrences(of: "\"", with: "\\\""))\"")
+            updates.append("set first name of p to \"\(escapeForAppleScript(fn))\"")
         }
         if let ln = lastName {
-            updates.append("set last name of p to \"\(ln.replacingOccurrences(of: "\"", with: "\\\""))\"")
+            updates.append("set last name of p to \"\(escapeForAppleScript(ln))\"")
         }
         if let org = organization {
-            updates.append("set organization of p to \"\(org.replacingOccurrences(of: "\"", with: "\\\""))\"")
+            updates.append("set organization of p to \"\(escapeForAppleScript(org))\"")
         }
         if let jt = jobTitle {
-            updates.append("set job title of p to \"\(jt.replacingOccurrences(of: "\"", with: "\\\""))\"")
+            updates.append("set job title of p to \"\(escapeForAppleScript(jt))\"")
         }
 
         guard !updates.isEmpty else { return false }
@@ -306,7 +314,7 @@ public actor ContactsService {
     // MARK: - Delete Contact
 
     public func deleteContact(id: String) async throws -> Bool {
-        let escapedId = id.replacingOccurrences(of: "\"", with: "\\\"")
+        let escapedId = escapeForAppleScript(id)
 
         let script = """
         tell application "Contacts"
@@ -348,7 +356,7 @@ public actor ContactsService {
     }
 
     public func getGroupMembers(groupName: String) async throws -> [Contact] {
-        let escapedName = groupName.replacingOccurrences(of: "\"", with: "\\\"")
+        let escapedName = escapeForAppleScript(groupName)
 
         let script = """
         tell application "Contacts"
